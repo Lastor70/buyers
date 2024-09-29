@@ -77,6 +77,8 @@ if st.button("Выгрузить и обработать заказы"):
     cash = 1 
     car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
     st.session_state['car_space_merged'] = car_space_merged
+    st.session_state['catalog_w_leads'] = catalog_w_leads
+    st.session_state['catalog_cash'] = catalog_cash
 
     st.write(processed_orders)
     # st.write(spend_wo_leads)
