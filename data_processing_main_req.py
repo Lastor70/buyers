@@ -116,7 +116,6 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     
     mask = ['number', 'status', 'customFields', 'items']
     df2 = df[mask]
-    print(df)
 
     def get_item_data(items, key):
         data = []
@@ -157,7 +156,8 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     desired_column_order = ['Номер замовлення', 'Статус', 'offer_id(товара)', 'Product_id', 'Назва товару', 'Кількість товару', 'Ціна товару', 'Загальна сума', 'offer_id(заказа)', 'buyer_id']
 
     df_items_expanded = df_items_expanded.reindex(columns=desired_column_order)
-    
+    # print(df_items_expanded)
+
     ss_dataset = df_items_expanded
 
     ss_dataset = add_match_column(ss_dataset, 'offer_id(товара)', 'offer_id(заказа)')
@@ -198,7 +198,7 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
 
 
     merged_ss = merge_data(merged_ss, df_grouped, b)
-    print(merged_ss)
+    # print(merged_ss)
 
     merged_ss = pd.merge(merged_ss, combined_df[['ID Оффера', 'Коэф. Слож.', 'Название оффера']], left_on='offer_id(заказа)', right_on='ID Оффера', how='left')
     merged_ss['Лид до $'] = merged_ss['Лид до $'].str.replace(',', '.').astype(float)
@@ -206,4 +206,8 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     merged_ss = merged_ss[merged_ss['offer_id'].str.match(r'^[a-zA-z]{2}-[a-zA-z]{2}-\d{4}$') & merged_ss['offer_id'].notna()]  #прибираю категорії
     merged_ss = merged_ss[merged_ss['spend'] != 0]
     
-    return merged_ss
+    spend_wo_leads = merged_ss[merged_ss['offer_id(заказа)'].isna()]
+
+    merged_ss = merged_ss[merged_ss['offer_id(заказа)'].notna()]
+
+    return merged_ss, spend_wo_leads, df_items_expanded

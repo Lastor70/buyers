@@ -9,9 +9,13 @@ from facebook_api import fetch_facebook_data
 def fetch_tokens_data(spreadsheet_id, sheet_name, creds_dict, buyer):
     return fetch_google_sheet_data(spreadsheet_id, sheet_name, creds_dict, buyer)
 
-# @st.cache_data
-def fetch_orders_data(api_key, start_date, end_date, buyer):
-    return get_orders(api_key, start_date, end_date, buyer)
+@st.cache_data
+def fetch_orders_data(api_key, start_date, end_date, buyer, request_type):
+    return get_orders(api_key, start_date, end_date, buyer, request_type)
+
+@st.cache_data
+def fetch_vykups_data(api_key, start_date, end_date, buyer, request_type):
+    return get_orders(api_key, start_date, end_date, buyer, request_type)
 
 @st.cache_data
 def fetch_offers_data(spreadsheet_id, creds_dict):
