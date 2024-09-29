@@ -50,7 +50,6 @@ df_payment, df_appruv_range = fetch_payment_data(spreadsheet_id_offers, sheet_na
 #     st.dataframe(df_appruv_range)
 
 
-df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
 # if st.button("Fetch Facebook Data"):
 #     if df_grouped is not None:
 #         st.dataframe(df_grouped)
@@ -60,6 +59,8 @@ df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
 
 # отримання даних з CRM
 if st.button("Выгрузить и обработать заказы"):
+    df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
+
     request_type = 'main'
     df_orders = fetch_orders_data(api_key, start_date_str, end_date_str, b, request_type)
     
@@ -70,17 +71,18 @@ if st.button("Выгрузить и обработать заказы"):
     st.session_state['df_orders'] = df_orders
     st.session_state['df'] = df
 
+    cash = 2  
+    catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
+
+    cash = 1 
+    car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
+    st.session_state['car_space_merged'] = car_space_merged
+
     st.write(processed_orders)
     # st.write(spend_wo_leads)
 
 
-df = st.session_state['df']
-cash = 2  
-catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
 
-cash = 1 
-car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-st.session_state['car_space_merged'] = car_space_merged
 
 # # catalog
 # if st.button('Catalog'):
