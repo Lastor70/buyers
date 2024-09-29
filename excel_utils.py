@@ -1,7 +1,7 @@
 import openpyxl
 
 def save_data_to_excel(catalog_w_leads, car_space_merged, catalog_cash, merged_ss, result_df, total_vykup, b, start_date, end_date):
-    file_path = 'data/Рассчет для баеров_template.xlsx'  # Вкажіть шлях до вашого шаблону
+    file_path = 'data/Рассчет для баеров_template.xlsx'  
     wb1 = openpyxl.load_workbook(file_path)
     sh_paste = wb1['Лист1']
     sh_vykup = wb1['Vykup']
@@ -17,8 +17,8 @@ def save_data_to_excel(catalog_w_leads, car_space_merged, catalog_cash, merged_s
         'Средняя сумма в апрувах': 'J',
         'Лид до $': 'L',
         'Коэф. Апрува': 'M',
-        'Рекл.спенд.': 'N',
-        'Лидов из ads': 'O',
+        'spend.': 'N',
+        'leads': 'O',
     }
 
     def paste_data(df, mapping, sheet):
