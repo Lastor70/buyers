@@ -17,7 +17,7 @@ def save_data_to_excel(catalog_w_leads, car_space_merged, catalog_cash, merged_s
         'Средняя сумма в апрувах': 'J',
         'Лид до $': 'L',
         'Коэф. Апрува': 'M',
-        'spend.': 'N',
+        'spend': 'N',
         'leads': 'O',
     }
 
