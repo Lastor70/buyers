@@ -60,7 +60,7 @@ df_payment, df_appruv_range = fetch_payment_data(spreadsheet_id_offers, sheet_na
 # отримання даних з CRM
 if st.button("Выгрузить и обработать заказы"):
     df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
-
+    st.session_state['df_grouped'] = df_grouped
     request_type = 'main'
     df_orders = fetch_orders_data(api_key, start_date_str, end_date_str, b, request_type)
     
@@ -113,6 +113,8 @@ if st.button("Выгрузить и обработать выкупы"):
     if 'processed_orders' in st.session_state:
         processed_orders = st.session_state['processed_orders']
         spend_wo_leads = st.session_state['spend_wo_leads']
+        df_grouped = st.session_state['df_grouped']
+
     else:
         st.warning("Спочатку завантажте замовлення, натиснувши кнопку 'Fetch Orders'.")
         processed_orders = None  
