@@ -98,16 +98,13 @@ def merge_data(df, all_fb, user_prefix):
         if df.empty:
             print("Порожній датафрейм")
             return df
-
         filtered_all_fb = all_fb[all_fb['offer_id'].str[3:5] == user_prefix]
-
         df = df.merge(filtered_all_fb, how='outer', left_on='offer_id(заказа)', right_on='offer_id')
-
         df = df[~(df['Кількість лідів'].isna() & (df['Рекл.спенд.'] == 0))]
 
         return df
     except Exception as e:
-        print(f"Помилка при злитті датафреймів: {e}")
+        # print(f"Помилка при злитті датафреймів: {e}")
         return df
 
 

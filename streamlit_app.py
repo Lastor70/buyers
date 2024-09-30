@@ -59,29 +59,37 @@ df_payment, df_appruv_range = fetch_payment_data(spreadsheet_id_offers, sheet_na
 
 # отримання даних з CRM
 if st.button("Выгрузить и обработать заказы"):
+    progress_bar = st.progress(0)  
+
+    #  дані з фб
     df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
     st.session_state['df_grouped'] = df_grouped
+    progress_bar.progress(20)
+
+    # закази з срм
     request_type = 'main'
     df_orders = fetch_orders_data(api_key, start_date_str, end_date_str, b, request_type)
-    
+    progress_bar.progress(40)
+
+    # обробка закаазів
     processed_orders, spend_wo_leads, df = process_orders_data(df_orders, combined_df, df_payment, df_appruv_range, df_grouped, b)
-    
     st.session_state['processed_orders'] = processed_orders
     st.session_state['spend_wo_leads'] = spend_wo_leads
     st.session_state['df_orders'] = df_orders
     st.session_state['df'] = df
+    progress_bar.progress(60)
 
+    # обробка каталога
     cash = 2  
     catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-
     cash = 1 
     car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
     st.session_state['car_space_merged'] = car_space_merged
     st.session_state['catalog_w_leads'] = catalog_w_leads
     st.session_state['catalog_cash'] = catalog_cash
+    progress_bar.progress(100)
 
     st.write(processed_orders)
-    # st.write(spend_wo_leads)
 
 
 
@@ -109,29 +117,38 @@ if st.button("Выгрузить и обработать заказы"):
 
 # отримання даних про викупи
 if st.button("Выгрузить и обработать выкупы"):
+    progress_bar = st.progress(0)  
     request_type = 'vykup'
-    
-    # чек чи є дані про замовлення у session_state
+
     if 'processed_orders' in st.session_state:
         processed_orders = st.session_state['processed_orders']
         spend_wo_leads = st.session_state['spend_wo_leads']
         df_grouped = st.session_state['df_grouped']
-
     else:
         st.warning("Спочатку завантажте замовлення, натиснувши кнопку 'Fetch Orders'.")
         processed_orders = None  
 
+    progress_bar.progress(20)  
+
     if processed_orders is not None:
         df_vykups = fetch_vykups_data(api_key, start_date_str, end_date_str, b, request_type)
-        processed_vykups, df_all_cs_catalog = process_orders_data_vykup(df_vykups, combined_df, df_payment, df_appruv_range, df_grouped, b, processed_orders)
-        
+        progress_bar.progress(40)  
+
+        processed_vykups, df_all_cs_catalog = process_orders_data_vykup(
+            df_vykups, combined_df, df_payment, df_appruv_range, df_grouped, b, processed_orders
+        )
+        progress_bar.progress(60) 
+
         car_space_merged = st.session_state['car_space_merged']
         catalog_w_leads = st.session_state['catalog_w_leads']
-        total_vykup = process_total_vykup(processed_vykups, df_all_cs_catalog, car_space_merged, catalog_w_leads, df_appruv_range)
-        
+        total_vykup = process_total_vykup(
+            processed_vykups, df_all_cs_catalog, car_space_merged, catalog_w_leads, df_appruv_range
+        )
+        progress_bar.progress(80) 
+
         st.session_state['total_vykup'] = total_vykup
         st.write(total_vykup)
-
+        progress_bar.progress(100) 
 
 if st.button("Вставить данные в эксель"):
     processed_orders = st.session_state.get('processed_orders')
