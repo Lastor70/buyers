@@ -63,7 +63,7 @@ if st.button("Выгрузить и обработать заказы"):
 
     #  дані з фб
     df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
-    st.write(df_grouped)
+    # st.write(df_grouped)
     st.session_state['df_grouped'] = df_grouped
     progress_bar.progress(20)
 
