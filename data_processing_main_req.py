@@ -194,12 +194,13 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
 
 
     merged_ss = merge_data(merged_ss, df_grouped, b)
-    # print(merged_ss)
 
     merged_ss = pd.merge(merged_ss, combined_df[['ID Оффера', 'Коэф. Слож.', 'Название оффера']], left_on='offer_id(заказа)', right_on='ID Оффера', how='left')
     merged_ss['Лид до $'] = merged_ss['Лид до $'].str.replace(',', '.').astype(float)
     merged_ss['Коэф. Апрува'] = merged_ss['Коэф. Апрува'].str.replace(',', '.').astype(float)
-    merged_ss = merged_ss[merged_ss['offer_id'].str.match(r'^[a-zA-z]{2}-[a-zA-z]{2}-\d{4}$') & merged_ss['offer_id'].notna()]  #прибираю категорії
+    merged_ss = merged_ss[merged_ss['offer_id(заказа)'].str.match(r'^[a-zA-z]{2}-[a-zA-z]{2}-\d{4}$') & merged_ss['offer_id(заказа)'].notna()]  #прибираю категорії
+    # print(merged_ss[merged_ss['offer_id(заказа)'] == 'ss-il-0071'])
+
     spend_wo_leads = merged_ss[merged_ss['offer_id(заказа)'].isna()]
 
     merged_ss = merged_ss[merged_ss['offer_id(заказа)'].notna()]
