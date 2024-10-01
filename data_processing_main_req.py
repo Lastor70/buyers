@@ -153,7 +153,6 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     desired_column_order = ['Номер замовлення', 'Статус', 'offer_id(товара)', 'Product_id', 'Назва товару', 'Кількість товару', 'Ціна товару', 'Загальна сума', 'offer_id(заказа)', 'buyer_id']
 
     df_items_expanded = df_items_expanded.reindex(columns=desired_column_order)
-    # print(df_items_expanded)
 
     ss_dataset = df_items_expanded
 
@@ -201,7 +200,6 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     merged_ss['Лид до $'] = merged_ss['Лид до $'].str.replace(',', '.').astype(float)
     merged_ss['Коэф. Апрува'] = merged_ss['Коэф. Апрува'].str.replace(',', '.').astype(float)
     merged_ss = merged_ss[merged_ss['offer_id'].str.match(r'^[a-zA-z]{2}-[a-zA-z]{2}-\d{4}$') & merged_ss['offer_id'].notna()]  #прибираю категорії
-    merged_ss = merged_ss[merged_ss['spend'] != 0]
     
     spend_wo_leads = merged_ss[merged_ss['offer_id(заказа)'].isna()]
 
