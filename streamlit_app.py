@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import streamlit as st
 from google_sheets import authenticate_google_sheets
 from caching import *
@@ -18,8 +18,11 @@ google_sheets_creds = st.secrets["gcp_service_account"]
 buyers_list = ['ss', 'il', 'dm', 'mb']
 b = st.selectbox("Виберите категорию заказа", buyers_list)
 
-start_date = st.date_input('Начальная дата', value=datetime(2024, 9, 1))
-end_date = st.date_input('Конечная дата', value=datetime(2024, 9, 3))
+current_date = datetime.now()
+first_day_of_month = current_date.replace(day=1)
+
+start_date = st.date_input('Начальная дата', value=first_day_of_month)
+end_date = st.date_input('Конечная дата', value=current_date)
 
 if end_date < start_date:
     st.error('Конечная дата не может быть раньше начальной даты')
@@ -30,31 +33,14 @@ end_date_str = end_date.strftime('%Y-%m-%d')
 # отримання токенів з гуглшит
 spreadsheet_id_tokens = '1Q8eFscYd9dsl6QTzLiRQqKXMg3HFuZgwjd9kg0fOMdQ'
 sheet_name_tokens = 'Лист1'
-
 df_tokens = fetch_tokens_data(spreadsheet_id_tokens, sheet_name_tokens, dict(google_sheets_creds), b)
-# if st.button("Fetch Tokens Data"):
-#     st.dataframe(df_tokens)
 
 # отримання даних справочніка гуглшит
 spreadsheet_id_offers = '15GvP6wElztDSQKqk5kxnB37dKxKi3nTyEsTbBF1vqW4'
-
 combined_df = fetch_offers_data(spreadsheet_id_offers, dict(google_sheets_creds))
-# if st.button("Fetch Spravochnik Data"):
-#     st.dataframe(combined_df)
-
+# отримання даних виплат
 sheet_name_payment = 'Выплата (new)'
-
 df_payment, df_appruv_range = fetch_payment_data(spreadsheet_id_offers, sheet_name_payment, dict(google_sheets_creds))
-# if st.button("Fetch Payment Data"):
-#     st.dataframe(df_payment)
-#     st.dataframe(df_appruv_range)
-
-
-# if st.button("Fetch Facebook Data"):
-#     if df_grouped is not None:
-#         st.dataframe(df_grouped)
-#     else:
-#         st.warning("Нету доступных токенов фб")
 
 
 # отримання даних з CRM
@@ -72,7 +58,7 @@ if st.button("Выгрузить и обработать заказы"):
     df_orders = fetch_orders_data(api_key, start_date_str, end_date_str, b, request_type)
     progress_bar.progress(40)
 
-    # обробка закаазів
+    # обробка заказів
     processed_orders, spend_wo_leads, df = process_orders_data(df_orders, combined_df, df_payment, df_appruv_range, df_grouped, b)
     st.session_state['processed_orders'] = processed_orders
     st.session_state['spend_wo_leads'] = spend_wo_leads
@@ -91,29 +77,6 @@ if st.button("Выгрузить и обработать заказы"):
     progress_bar.progress(100)
 
     st.write(processed_orders)
-
-
-
-
-# # catalog
-# if st.button('Catalog'):
-#     if 'df' in st.session_state:
-#         df = st.session_state['df']
-#         cash = 2  
-#         catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-#         st.write(catalog_w_leads)
-#         st.session_state['catalog_w_leads'] = catalog_w_leads
-#         st.session_state['catalog_cash'] = catalog_cash
-#     else: pass
-
-# if st.button('Car Space'):
-#     if 'df' in st.session_state:
-#         df = st.session_state['df']
-#         cash = 1 
-#         car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-#         st.write(car_space_merged)
-#         st.session_state['car_space_merged'] = car_space_merged
-#     else: pass
 
 
 # отримання даних про викупи
@@ -150,6 +113,7 @@ if st.button("Выгрузить и обработать выкупы"):
         st.session_state['total_vykup'] = total_vykup
         st.write(total_vykup)
         progress_bar.progress(100) 
+
 
 if st.button("Вставить данные в эксель"):
     processed_orders = st.session_state.get('processed_orders')
