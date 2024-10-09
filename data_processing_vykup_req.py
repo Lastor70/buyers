@@ -115,7 +115,7 @@ def process_total_vykup(processed_vykups, df_all_cs_catalog, car_space_merged, c
     total_vykup_cs_catalog['Коэф. Слож.'] = 1.0
     #окремі значення % апрува дл кс та каталокжи
     total_vykup_cs_catalog['% Аппрува'] = np.where(
-        total_vykup_cs_catalog['offer_id(заказа)'].str.contains('cs'),
+        total_vykup_cs_catalog['offer_id(заказа)'].str.startswith('cs'),
         avg_appruv_cs_value,
         avg_appruv_catalog_value
     )
