@@ -1,4 +1,3 @@
-from tkinter import ttk
 import streamlit as st
 from google_sheets import fetch_google_sheet_data, authenticate_google_sheets
 from crm_requests import get_orders
