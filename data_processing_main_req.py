@@ -159,8 +159,11 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     ss_dataset = add_match_column(ss_dataset, 'offer_id(товара)', 'offer_id(заказа)')
     
     ss_dataset['Corresponding_Offer_Id_Found'] = ss_dataset.apply(find_offer_id, args=(combined_df,), axis=1).fillna(0)
-    ss_dataset = ss_dataset.loc[ss_dataset['Corresponding_Offer_Id_Found'] == 1]
-    
+    # ss_dataset = ss_dataset.loc[ss_dataset['Corresponding_Offer_Id_Found'] == 1]
+    ss_dataset = ss_dataset\
+    .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))\
+    .query('cor_sum > 0')
+
 
     ss_new = ss_dataset[~ss_dataset['Статус'].isin(['testy','duplicate'])]
 

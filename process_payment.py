@@ -36,4 +36,12 @@ def fetch_and_process_payment_sheet(gc, spreadsheet_id, sheet_name):
     df_pay['Сумма по товарам(вкл.)'] = df_pay['Сумма по товарам(вкл.)'].apply(extract_numbers)
     df_pay['Выплата за выкуп(ставка)'] = df_pay['Выплата за выкуп(ставка)'].str.replace('$', '').str.replace(',', '.').astype(float)
 
-    return df_pay, df_appruv_range
+    df_buyers_name = df_payment.iloc[:, 9:10]
+    df_buyers_name.columns = df_buyers_name.iloc[1]
+    df_buyers_name = df_buyers_name.iloc[2:]
+
+    df_buyers_name = df_buyers_name.dropna(how='all').reset_index(drop=True)
+    df_buyers_name = df_buyers_name[df_buyers_name['buyer_id'].str.len() >= 2]
+
+
+    return df_pay, df_appruv_range,df_buyers_name

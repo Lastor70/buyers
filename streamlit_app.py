@@ -15,8 +15,16 @@ st.header('Фильтр по датам')
 api_key = st.secrets["api_key"]
 google_sheets_creds = st.secrets["gcp_service_account"]
 
+# отримання даних справочніка гуглшит
+spreadsheet_id_offers = '15GvP6wElztDSQKqk5kxnB37dKxKi3nTyEsTbBF1vqW4'
+combined_df = fetch_offers_data(spreadsheet_id_offers, dict(google_sheets_creds))
+# отримання даних виплат
+sheet_name_payment = 'Выплата (new)'
+df_payment, df_appruv_range,df_buyers_name = fetch_payment_data(spreadsheet_id_offers, sheet_name_payment, dict(google_sheets_creds))
+
+
 buyers_list = ['ss', 'il', 'dm', 'mb']
-b = st.selectbox("Виберите категорию заказа", buyers_list)
+b = st.selectbox("Виберите категорию заказа", df_buyers_name)
 
 current_date = datetime.now()
 first_day_of_month = current_date.replace(day=1)
@@ -34,13 +42,6 @@ end_date_str = end_date.strftime('%Y-%m-%d')
 spreadsheet_id_tokens = '1Q8eFscYd9dsl6QTzLiRQqKXMg3HFuZgwjd9kg0fOMdQ'
 sheet_name_tokens = 'Лист1'
 df_tokens = fetch_tokens_data(spreadsheet_id_tokens, sheet_name_tokens, dict(google_sheets_creds), b)
-
-# отримання даних справочніка гуглшит
-spreadsheet_id_offers = '15GvP6wElztDSQKqk5kxnB37dKxKi3nTyEsTbBF1vqW4'
-combined_df = fetch_offers_data(spreadsheet_id_offers, dict(google_sheets_creds))
-# отримання даних виплат
-sheet_name_payment = 'Выплата (new)'
-df_payment, df_appruv_range = fetch_payment_data(spreadsheet_id_offers, sheet_name_payment, dict(google_sheets_creds))
 
 
 # отримання даних з CRM
