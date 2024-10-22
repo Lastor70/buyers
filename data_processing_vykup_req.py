@@ -40,14 +40,14 @@ def process_orders_data_vykup(df, combined_df, df_payment, df_appruv_range, df_g
     df_items_expanded_1.drop(['customFields', 'items'], axis = 1)
 
     df_v = df_items_expanded_1#[df_items_expanded_1['Статус'].isin(['payoff','complete', 'dostavlen-predvaritelno', 'given'])]
-
     df_v.dropna(subset=['Product_id'], inplace=True)
     df_v.dropna(subset=['buyer_id'], inplace=True)
     df_v['offer_id(товара)'] = df_v['Product_id'].apply(lambda x: '-'.join(x.split('-')[:3]))
     df_v['Загальна сума'] = df_v['Ціна товару'] * df_v['Кількість товару']
 
     df_v['Corresponding_Offer_Id_Found'] = df_v.apply(find_offer_id, args=(combined_df,), axis=1).fillna(0)
-    df_v = df_v.loc[df_v['Corresponding_Offer_Id_Found'] == 1]
+    if b != 'ph':
+        df_v = df_v.loc[df_v['Corresponding_Offer_Id_Found'] == 1]
 
     avg_appruv_df = merged_ss[merged_ss['Кількість аппрувів'] >= 10]
     avg_appruv_value = avg_appruv_df['% Аппрува'].mean()
@@ -62,7 +62,8 @@ def process_orders_data_vykup(df, combined_df, df_payment, df_appruv_range, df_g
     total_vykup = pd.merge(total_vykup, combined_df[['ID Оффера', 'Коэф. Слож.', 'Название оффера']], left_on='offer_id(заказа)', right_on='ID Оффера', how='left')
     total_vykup['% Аппрува'] = avg_appruv_value
 
-    
+    total_vykup['Коэф. Слож.'] = total_vykup['Коэф. Слож.'].fillna(1)
+
     try:
         total_vykup['Коэф. Апрува'] = total_vykup['% Аппрува'].apply(lambda x: get_appruv_coefficient(x, df_appruv_range)).str.replace(',', '.').astype(float)
         total_vykup['Виплата баеру'] = total_vykup['Сума'] * 0.05 * 1000 * 0.000080 * total_vykup['Коэф. Слож.'] * total_vykup['Коэф. Апрува']
@@ -128,5 +129,4 @@ def process_total_vykup(processed_vykups, df_all_cs_catalog, car_space_merged, c
         total_vykup_cs_catalog['Виплата баеру'] = 0
 
     total_vykup = pd.concat([processed_vykups, total_vykup_cs_catalog], ignore_index=True)
-    
     return total_vykup
