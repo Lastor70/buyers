@@ -53,9 +53,10 @@ def save_data_to_excel(catalog_w_leads, car_space_merged, catalog_cash, merged_s
         paste_data(car_space_merged, column_mapping, sh_car_space)
     if not catalog_cash.empty:
         paste_data(catalog_cash, map_cash, sh_catalog)
+    if not result_df.empty:
+        paste_data(result_df, map_cash, sh_paste)
 
     paste_data(merged_ss, column_mapping, sh_paste)
-    paste_data(result_df, map_cash, sh_paste)
     paste_data(total_vykup, map_vykup, sh_vykup)
 
     filename = f'{b}-рассчет_{start_date}-{end_date}.xlsx'

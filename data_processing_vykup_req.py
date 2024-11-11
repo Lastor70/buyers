@@ -95,7 +95,8 @@ def process_orders_data_vykup(df, combined_df, df_payment, df_appruv_range, df_g
 def process_total_vykup(processed_vykups, df_all_cs_catalog, car_space_merged, catalog_w_leads, df_appruv_range):
 
     try:
-        avg_appruv_df_cs = car_space_merged[car_space_merged['Кількість аппрувів'] >= 10]
+        avg_appruv_df_cs = car_space_merged
+        # avg_appruv_df_cs = car_space_merged[car_space_merged['Кількість аппрувів'] >= 10]
     except:
         avg_appruv_df_cs = car_space_merged
 

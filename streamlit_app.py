@@ -44,86 +44,55 @@ sheet_name_tokens = 'Лист1'
 df_tokens = fetch_tokens_data(spreadsheet_id_tokens, sheet_name_tokens, dict(google_sheets_creds), b)
 
 
-# отримання даних з CRM
-if st.button("Выгрузить и обработать заказы"):
-    progress_bar = st.progress(0)  
+# Кнопка для вигрузки та обробки даних
+if st.button("Выгрузить и обработать данные"):
+    progress_bar = st.progress(0)
 
-    #  дані з фб
+    # Отримання даних з ФБ
     df_grouped = cached_fetch_facebook_data(df_tokens, start_date_str, end_date_str)
-    # st.write(df_grouped)
     st.session_state['df_grouped'] = df_grouped
     progress_bar.progress(20)
 
-    # закази з срм
+    # Отримання замовлень з CRM
     request_type = 'main'
     df_orders = fetch_orders_data(api_key, start_date_str, end_date_str, b, request_type)
     progress_bar.progress(40)
 
-    # обробка заказів
+    # Обробка замовлень
     processed_orders, spend_wo_leads, df = process_orders_data(df_orders, combined_df, df_payment, df_appruv_range, df_grouped, b)
-    st.session_state['processed_orders'] = processed_orders
-    st.session_state['spend_wo_leads'] = spend_wo_leads
-    st.session_state['df_orders'] = df_orders
-    st.session_state['df'] = df
+    st.session_state.update({
+        'processed_orders': processed_orders,
+        'spend_wo_leads': spend_wo_leads,
+        'df_orders': df_orders,
+        'df': df
+    })
     progress_bar.progress(60)
 
-    # обробка каталога
-    cash = 2  
-    catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-    cash = 1 
-    car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, cash, df_appruv_range)
-    st.session_state['car_space_merged'] = car_space_merged
-    st.session_state['catalog_w_leads'] = catalog_w_leads
-    st.session_state['catalog_cash'] = catalog_cash
+    # Обробка каталогу
+    catalog_w_leads, catalog_cash = process_catalog(df, df_payment, df_grouped, combined_df, b, df_appruv_range=df_appruv_range, cash=2)
+    car_space_merged = process_carspace(df, df_payment, df_grouped, combined_df, b, df_appruv_range=df_appruv_range, cash=1)
+
+    st.session_state.update({
+        'car_space_merged': car_space_merged,
+        'catalog_w_leads': catalog_w_leads,
+        'catalog_cash': catalog_cash
+    })
+    progress_bar.progress(80)
+
+    # Отримання та обробка даних про викупи
+    df_vykups = fetch_vykups_data(api_key, start_date_str, end_date_str, b, request_type='vykup')
+    processed_vykups, df_all_cs_catalog = process_orders_data_vykup(df_vykups, combined_df, df_payment, df_appruv_range, df_grouped, b, processed_orders)
+    total_vykup = process_total_vykup(processed_vykups, df_all_cs_catalog, car_space_merged, catalog_w_leads, df_appruv_range)
+    st.session_state['total_vykup'] = total_vykup
     progress_bar.progress(100)
 
-    st.write(processed_orders)
-
-
-# отримання даних про викупи
-if st.button("Выгрузить и обработать выкупы"):
-    progress_bar = st.progress(0)  
-    request_type = 'vykup'
-
-    if 'processed_orders' in st.session_state:
-        processed_orders = st.session_state['processed_orders']
-        spend_wo_leads = st.session_state['spend_wo_leads']
-        df_grouped = st.session_state['df_grouped']
-    else:
-        st.warning("Спочатку завантажте замовлення, натиснувши кнопку 'Fetch Orders'.")
-        processed_orders = None  
-
-    progress_bar.progress(20)  
-
-    if processed_orders is not None:
-        df_vykups = fetch_vykups_data(api_key, start_date_str, end_date_str, b, request_type)
-        progress_bar.progress(40)  
-
-        processed_vykups, df_all_cs_catalog = process_orders_data_vykup(
-            df_vykups, combined_df, df_payment, df_appruv_range, df_grouped, b, processed_orders
-        )
-        progress_bar.progress(60) 
-
-        car_space_merged = st.session_state['car_space_merged']
-        catalog_w_leads = st.session_state['catalog_w_leads']
-        total_vykup = process_total_vykup(
-            processed_vykups, df_all_cs_catalog, car_space_merged, catalog_w_leads, df_appruv_range
-        )
-        progress_bar.progress(80) 
-
-        st.session_state['total_vykup'] = total_vykup
-        st.write(total_vykup)
-        progress_bar.progress(100) 
-
-
-if st.button("Вставить данные в эксель"):
-    processed_orders = st.session_state.get('processed_orders')
-    car_space_merged = st.session_state.get('car_space_merged')
-    catalog_w_leads = st.session_state.get('catalog_w_leads')
-    catalog_cash = st.session_state.get('catalog_cash')
-    spend_wo_leads = st.session_state.get('spend_wo_leads')
-    total_vykup = st.session_state.get('total_vykup')
     
+    # st.write(processed_orders)
+    # st.write(total_vykup)
+
+
+
+    # Кнопка для збереження та завантаження даних в Excel
     filename = save_data_to_excel(
         catalog_w_leads, 
         car_space_merged, 
@@ -138,9 +107,13 @@ if st.button("Вставить данные в эксель"):
     
     with open(filename, "rb") as f:
         st.download_button(
-            "Скачать",
+            "Скачать Excel файл",
             f,
             file_name=filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key="download_excel"  
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
+
+
+    
+

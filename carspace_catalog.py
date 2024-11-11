@@ -64,6 +64,7 @@ def process_catalog(df, df_payment,df_grouped,combined_df,b, cash, df_appruv_ran
         catalog_w_leads = catalog_merged[catalog_merged['offer_id'].str.match(r'^[a-zA-Z]{2}-[a-zA-Z]{2}-[^0-9]{0,3}\d{0,3}[^0-9]{1,}$') & (~catalog_merged['offer_id'].isna())]
         catalog_cash = catalog_w_leads[(catalog_w_leads['Кількість лідів'].isna() & catalog_w_leads['spend'] !=0)] #без лідів зі спендом
         catalog_w_leads = catalog_w_leads.dropna(subset=['offer_id(заказа)'])
+        catalog_cash = catalog_cash.rename(columns={'spend':'Рекл.спенд.'})
     except:
         catalog_w_leads = catalog_merged
         catalog_cash = pd.DataFrame()
