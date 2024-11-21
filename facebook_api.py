@@ -157,6 +157,8 @@ def group_data_by_offer_id(df):
         df['spend'] = pd.to_numeric(df['spend'], errors='coerce')
         df.drop_duplicates(inplace=True)
         df_grouped = df.groupby('offer_id').agg({'spend': 'sum', 'leads': 'sum'}).reset_index()
+        df_grouped['offer_id'] = df_grouped['offer_id'].str.replace('\ufeff', '', regex=False)
+
         return df_grouped
     except Exception as e:
         print(f"Проблема з групуванням даних: {e}")
