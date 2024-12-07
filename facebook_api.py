@@ -5,7 +5,7 @@ import aiohttp
 
 def get_ad_accounts(access_token):
     url = 'https://graph.facebook.com/v18.0/me/adaccounts'
-    fields = 'id,name,amount_spent,spend_cap'
+    fields = 'id,name'#,amount_spent,spend_cap'
     limit = 100
     data = []
     page_count = 0
@@ -158,7 +158,7 @@ def group_data_by_offer_id(df):
         df.drop_duplicates(inplace=True)
         df_grouped = df.groupby('offer_id').agg({'spend': 'sum', 'leads': 'sum'}).reset_index()
         df_grouped['offer_id'] = df_grouped['offer_id'].str.replace('\ufeff', '', regex=False)
-
+        # print(df_grouped[df_grouped['offer_id'].str.contains('tv-mb-0003')]['offer_id'].iloc[0])
         return df_grouped
     except Exception as e:
         print(f"Проблема з групуванням даних: {e}")
