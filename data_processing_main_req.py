@@ -160,13 +160,14 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     
     ss_dataset['Corresponding_Offer_Id_Found'] = ss_dataset.apply(find_offer_id, args=(combined_df,), axis=1).fillna(0)
     # ss_dataset = ss_dataset.loc[ss_dataset['Corresponding_Offer_Id_Found'] == 1]
-    if b == 'ph':
+    if (b == 'ph') |( b == 'dn'):
         ss_dataset = ss_dataset\
         .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))
     else:
         ss_dataset = ss_dataset\
         .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))\
         .query('cor_sum > 0')
+    print(ss_dataset)
 
     ss_new = ss_dataset[~ss_dataset['Статус'].isin(['testy','duplicate'])]
 
@@ -191,7 +192,7 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     appruv_ss = count_unique_orders(ss_new, 'Кількість аппрувів')
 
     merged_ss = merge_all_data(leads_ss, clear_leads_ss, sum_per_order_ss, appruv_ss)
-    
+
     merged_ss['% Аппрува'] = merged_ss['Кількість аппрувів'] / merged_ss['Кількість лідів'] * 100
     merged_ss['Коэф. Апрува'] = merged_ss['% Аппрува'].apply(lambda x: get_appruv_coefficient(x, df_appruv_range))
     merged_ss['Средняя сумма в апрувах'] = merged_ss['Сума'] / merged_ss['Кількість аппрувів']
