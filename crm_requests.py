@@ -77,6 +77,7 @@ def fetch_orders_params(api_key, start_date, end_date, buyer_id, request_type):
             'filter[createdAtFrom]': start_date,
             'filter[createdAtTo]': end_date,
             'filter[customFields][buyer_id]': buyer_id,
+            'limit': 100,
         }
     else:
         params = {
@@ -84,6 +85,7 @@ def fetch_orders_params(api_key, start_date, end_date, buyer_id, request_type):
             'filter[statusUpdatedAtFrom]': start_date,
             'filter[statusUpdatedAtTo]': end_date,
             'filter[customFields][buyer_id]': buyer_id,
+            'limit': 100,
         }
 
     r = requests.get(url, params=params)

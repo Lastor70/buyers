@@ -111,7 +111,7 @@ def merge_data(df, all_fb, user_prefix):
 def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped, b):
     """Обробляє отримані замовлення та форматує DataFrame."""
     
-    mask = ['number', 'status', 'customFields', 'items']
+    mask = ['number', 'status', 'createdAt', 'customFields', 'items']
     df2 = df[mask]
 
     def get_item_data(items, key):
@@ -131,10 +131,10 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     df_items_expanded['name'] = df_items_expanded['items'].apply(lambda x: x['offer']['name'] if isinstance(x, dict) and 'offer' in x and 'name' in x['offer'] else None)
     df_items_expanded['item_buyer_id'] = df_items_expanded.apply(lambda x: x['customFields']['buyer_id'] if 'buyer_id' in x['customFields'] else None, axis=1)
     df_items_expanded['item_offer_id'] = df_items_expanded.apply(lambda x: x['customFields']['offer_id'] if 'offer_id' in x['customFields'] else None, axis=1)
-
     df_items_expanded = df_items_expanded.rename(columns={
         'number': 'Номер замовлення',
         'status': 'Статус',
+        'createdAt': 'Дата создания',
         'externalId': 'Product_id',
         'name': 'Назва товару',
         'quantity': 'Кількість товару',
@@ -160,14 +160,13 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     
     ss_dataset['Corresponding_Offer_Id_Found'] = ss_dataset.apply(find_offer_id, args=(combined_df,), axis=1).fillna(0)
     # ss_dataset = ss_dataset.loc[ss_dataset['Corresponding_Offer_Id_Found'] == 1]
-    if (b == 'ph') |( b == 'dn'):
+    if  b == 'dn':
         ss_dataset = ss_dataset\
         .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))
     else:
         ss_dataset = ss_dataset\
         .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))\
         .query('cor_sum > 0')
-    print(ss_dataset)
 
     ss_new = ss_dataset[~ss_dataset['Статус'].isin(['testy','duplicate'])]
 
@@ -205,11 +204,15 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     merged_ss = pd.merge(merged_ss, combined_df[['ID Оффера', 'Коэф. Слож.', 'Название оффера']], left_on='offer_id(заказа)', right_on='ID Оффера', how='left')
     merged_ss['Лид до $'] = merged_ss['Лид до $'].str.replace(',', '.').astype(float)
     merged_ss['Коэф. Апрува'] = merged_ss['Коэф. Апрува'].str.replace(',', '.').astype(float)
+    
+    spend_wo_leads = merged_ss[merged_ss['offer_id(заказа)'].isna() & merged_ss['spend']>0]
+    
     merged_ss = merged_ss[merged_ss['offer_id(заказа)'].str.match(r'^[a-zA-z]{2}-[a-zA-z]{2}-\d{4}$') & merged_ss['offer_id(заказа)'].notna()]  #прибираю категорії
     # print(merged_ss[merged_ss['offer_id(заказа)'] == 'ss-il-0071'])
+    spend_wo_leads = spend_wo_leads[spend_wo_leads['offer_id'].str.match(r'^[a-zA-Z]{2}-[a-zA-Z]{2}-\d{4}$', na=False)]
+    spend_wo_leads = spend_wo_leads.rename(columns = {'spend':'Рекл.спенд.','leads': 'Лидов из ads'})
+    print(spend_wo_leads)
 
-    spend_wo_leads = merged_ss[merged_ss['offer_id(заказа)'].isna()]
 
     merged_ss = merged_ss[merged_ss['offer_id(заказа)'].notna()]
-
     return merged_ss, spend_wo_leads, df_items_expanded

@@ -55,12 +55,14 @@ def fetch_and_process_all_sheets(gc, spreadsheet_id):
     df_dima = process_dataframe(df_offers, 22, 28)
     df_oleg = process_dataframe(df_offers, 29, 35)
     df_vlad = process_dataframe(df_offers, 36, 42)
+    df_pasha = process_dataframe(df_offers, 43, 49)
+
 
     df_sasha_tv = process_dataframe(df_offers_tv, 1, 7)
     df_maks_tv = process_dataframe(df_offers_tv, 8, 14)
     df_ilya_tv = process_dataframe(df_offers_tv, 15, 21)
     df_dima_tv = process_dataframe(df_offers_tv, 22, 28)
-    df_oleg_tv = process_dataframe(df_offers_tv, 29, 35)
+    df_pasha_tv = process_dataframe(df_offers_tv, 29, 35)
     df_vlad_tv = process_dataframe(df_offers_tv, 36, 42)
 
     df_sasha_nr = process_dataframe(df_offers_nr, 1, 7)
@@ -69,10 +71,11 @@ def fetch_and_process_all_sheets(gc, spreadsheet_id):
     df_dima_nr = process_dataframe(df_offers_nr, 22, 28)
     df_oleg_nr = process_dataframe(df_offers_nr, 29, 35)
 
+
     # Об'єднання всіх DataFrame
     dfs = [
-        df_sasha, df_maks, df_ilya, df_dima, df_oleg, df_vlad,
-        df_sasha_tv, df_maks_tv, df_ilya_tv, df_dima_tv, df_oleg_tv, df_vlad_tv,
+        df_sasha, df_maks, df_ilya, df_dima, df_oleg, df_vlad,df_pasha,
+        df_sasha_tv, df_maks_tv, df_ilya_tv, df_dima_tv, df_pasha_tv, df_vlad_tv,
         df_sasha_nr, df_maks_nr, df_ilya_nr, df_dima_nr, df_oleg_nr
     ]
     combined_df = pd.concat(dfs, ignore_index=True)
