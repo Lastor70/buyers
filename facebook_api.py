@@ -147,7 +147,7 @@ def fetch_facebook_data(df_tokens, start_date_str, end_date_str):
         campaigns_data['offer_id'] = campaigns_data['Campaign Name'].apply(lambda x: x.split('|')[2].strip() if len(x.split('|')) > 2 else None)
         campaigns_data = campaigns_data.dropna(subset=['offer_id'])
         df_campaign_data = asyncio.run(get_campaign_data_for_filtered_df(campaigns_data, start_date_str, end_date_str))
-        print(df_campaign_data)
+        print(111)
         df_grouped = group_data_by_offer_id(df_campaign_data)
         return df_grouped
     return None
@@ -155,10 +155,12 @@ def fetch_facebook_data(df_tokens, start_date_str, end_date_str):
 def group_data_by_offer_id(df):
     try:
         df['spend'] = pd.to_numeric(df['spend'], errors='coerce')
-        df.drop_duplicates(inplace=True)
+        df.drop_duplicates(['Campaign ID'],inplace=True)
+        # print(df[df['offer_id'] == 'ss-ss-0167'])
         df_grouped = df.groupby('offer_id').agg({'spend': 'sum', 'leads': 'sum'}).reset_index()
         df_grouped['offer_id'] = df_grouped['offer_id'].str.replace('\ufeff', '', regex=False)
         # print(df_grouped[df_grouped['offer_id'].str.contains('tv-mb-0003')]['offer_id'].iloc[0])
+        
         return df_grouped
     except Exception as e:
         print(f"Проблема з групуванням даних: {e}")
