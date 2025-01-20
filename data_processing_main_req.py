@@ -157,7 +157,6 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     ss_dataset = df_items_expanded
 
     ss_dataset = add_match_column(ss_dataset, 'offer_id(товара)', 'offer_id(заказа)')
-    
     ss_dataset['Corresponding_Offer_Id_Found'] = ss_dataset.apply(find_offer_id, args=(combined_df,), axis=1).fillna(0)
     # ss_dataset = ss_dataset.loc[ss_dataset['Corresponding_Offer_Id_Found'] == 1]
     if  b == 'dn':
@@ -166,7 +165,7 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     else:
         ss_dataset = ss_dataset\
         .assign(cor_sum = lambda x: x.groupby('Номер замовлення')['Corresponding_Offer_Id_Found'].transform('sum'))\
-        .query('cor_sum > 0')
+        # .query('cor_sum > 0')
 
     ss_new = ss_dataset[~ss_dataset['Статус'].isin(['testy','duplicate'])]
 
@@ -189,6 +188,7 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
 
     #тута кількість аппрувів
     appruv_ss = count_unique_orders(ss_new, 'Кількість аппрувів')
+    print(appruv_ss[appruv_ss['offer_id(заказа)']=='ss-il-0090'])
 
     merged_ss = merge_all_data(leads_ss, clear_leads_ss, sum_per_order_ss, appruv_ss)
 
@@ -211,7 +211,6 @@ def process_orders_data(df, combined_df, df_payment, df_appruv_range, df_grouped
     # print(merged_ss[merged_ss['offer_id(заказа)'] == 'ss-il-0071'])
     spend_wo_leads = spend_wo_leads[spend_wo_leads['offer_id'].str.match(r'^[a-zA-Z]{2}-[a-zA-Z]{2}-\d{4}$', na=False)]
     spend_wo_leads = spend_wo_leads.rename(columns = {'spend':'Рекл.спенд.','leads': 'Лидов из ads'})
-    print(spend_wo_leads)
 
 
     merged_ss = merged_ss[merged_ss['offer_id(заказа)'].notna()]
